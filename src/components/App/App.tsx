@@ -1,4 +1,3 @@
-// src/components/App/App.tsx
 import { useState } from 'react';
 import {
   useQuery,
@@ -45,7 +44,7 @@ export default function App() {
       }),
   });
 
-  const notes = data?.results ?? [];
+  const notes = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 0;
 
   const createMutation = useMutation({
