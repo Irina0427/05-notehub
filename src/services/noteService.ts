@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Note, NoteTag } from '../types/note';
 
-const token = import.meta.env.VITE_NOTEHUB_TOKEN as string;
+const token = import.meta.env.VITE_NOTEHUB_TOKEN as string | undefined;
 
 if (!token) {
   throw new Error('VITE_NOTEHUB_TOKEN is missing');
@@ -15,25 +15,15 @@ const api = axios.create({
 });
 
 export interface FetchNotesParams {
-  page: number;
-  perPage: number;
+  page?: number;
+  perPage?: number;
   search?: string;
 }
 
 export interface FetchNotesResponse {
   notes: Note[];
-  page: number;
-  perPage: number;
   totalPages: number;
-  totalNotes: number;
 }
-
-export const fetchNotes = async (
-  params: FetchNotesParams,
-): Promise<FetchNotesResponse> => {
-  const { data } = await api.get<FetchNotesResponse>('/notes', { params });
-  return data; 
-};
 
 export interface CreateNotePayload {
   title: string;
@@ -41,14 +31,30 @@ export interface CreateNotePayload {
   tag: NoteTag;
 }
 
-export const createNote = async (
+export interface DeleteNoteResponse {
+  note: Note;
+}
+
+export async function fetchNotes(
+  params: FetchNotesParams,
+): Promise<FetchNotesResponse> {
+  const { page = 1, perPage = 12, search } = params;
+
+  const { data } = await api.get<FetchNotesResponse>('/notes', {
+    params: { page, perPage, search },
+  });
+
+  return data;
+}
+
+export async function createNote(
   payload: CreateNotePayload,
-): Promise<Note> => {
+): Promise<Note> {
   const { data } = await api.post<Note>('/notes', payload);
   return data;
-};
+}
 
-export const deleteNote = async (id: string): Promise<Note> => {
-  const { data } = await api.delete<Note>(`/notes/${id}`);
+export async function deleteNote(id: string): Promise<DeleteNoteResponse> {
+  const { data } = await api.delete<DeleteNoteResponse>(`/notes/${id}`);
   return data;
-};
+}
